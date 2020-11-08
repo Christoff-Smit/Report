@@ -1,0 +1,10 @@
+\boolfalse {citerequest}\boolfalse {citetracker}\boolfalse {pagetracker}\boolfalse {backtracker}\relax 
+\contentsline {figure}{\numberline {1.1}{\ignorespaces Project Gantt chart}}{4}{figure.1.1}%
+\contentsline {figure}{\numberline {1.2}{\ignorespaces System Context Diagram (preliminary)}}{4}{figure.1.2}%
+\contentsline {figure}{\numberline {1.3}{\ignorespaces System Physical Architecture (preliminary)}}{5}{figure.1.3}%
+\contentsline {figure}{\numberline {1.4}{\ignorespaces Full System Life-Cycle}}{5}{figure.1.4}%
+\contentsline {figure}{\numberline {1.5}{\ignorespaces Function 3.0 - Operate SCCS}}{6}{figure.1.5}%
+\contentsline {figure}{\numberline {2.1}{\ignorespaces 2-channel audio recording of a dog barking}}{7}{figure.2.1}%
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Periodogram (FFT) of the audio recording}}{8}{figure.2.2}%
+\contentsline {figure}{\numberline {2.3}{\ignorespaces STFT (NFFT=512, noverlap=128)}}{9}{figure.2.3}%
+\contentsline {figure}{\numberline {2.4}{\ignorespaces MFCC'c heatmap (N=13)}}{9}{figure.2.4}%
