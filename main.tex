@@ -219,6 +219,8 @@ sorting=none
 
 \section*{List of Acronyms}
 \textbf{MFCC's} - Mel Frequency Ceptral Coefficients\\
+\textbf{CV} - Computer Vision\\
+\textbf{MIR} - Music Information Retrieval\\
 
 
 
@@ -495,11 +497,15 @@ The detection and interpretation of sounds have been a part of humans' daily liv
 
 % The act of sound detection.
 
+% Multiclass classification (>2) VS Binary classification (2)
+
 Sound may be recorded in a given number of channels, using a microphone with a specified bit-depth. The bit-depth indicates the amount of frequencies which may be uniquely identified by the sensor (microphone).
 
-%TODO talk about sound (nearly) always coming in as a mixture of different sounds (possibly from different sources).
+%talk about sound (nearly) always coming in as a mixture of different sounds (possibly from different sources).
 
-%TODO talk about sound being waves of air pressure, of which the vibrations are detected by a sensor (microphone) and converted to electrical voltage for performing the analog to digital conversion (ADC) process. In the end a discrete-sampled (digital) waveform is obtained. (mention Nyquist frequency here)
+%talk about sound being waves of air pressure, of which the vibrations are detected by a sensor (microphone) and converted to electrical voltage by a "sound-card" to perform the analog to digital conversion (ADC) process. In the end a discrete-sampled (digital) waveform (which can be processed and saved on a computer) is obtained.
+
+%praat oor resolution van mics i.t.v. Bit Depth (vir quantization op die y-as (amplitude)) en ook i.t.v. Sampling Rate/Frequency (en noem ook die Nyquist frequency is 44100/2 = 22050 en dus voldoende weens human hearing range wat stop by 20k)
 
 
 
@@ -513,11 +519,13 @@ Figure \ref{wav_example} shows the WAV file recording of a dog barking 5 times o
     \label{wav_example}
 \end{figure}
 
-%TODO the digital waveform is quantized in: time (44 100 Hz sampling rate of mic) and in amplitude (16 bit d.w.s 2^16 uniquely identifiable frequencies)
+%the digital waveform is quantized in: time (44 100 Hz sampling rate of mic) and in amplitude (16 bit d.w.s 2^16 uniquely identifiable frequencies)
 
-%TODO mention how it's safest (by avoiding artifacts and so on) to use an uncompressed format (i.e. WAV (and not MP3?)) for the audio samples.
+%mention how it's safest (by avoiding artifacts and so on) to use an uncompressed format (i.e. WAV (and not MP3?)) for the audio samples. Basically ganit net oor audio files wat redelik groot is, en waarvoor daar al baie compression methods design is e.g. MP3 en al doen dit 'n goeie job is dit ongelukkig ook redelik lossy)
 
-%TODO mention that the 4s samples will be divided into a few different windows/segments (e.g. four 1s windows) -> to reduce the complexity of the machine learning algorithm. OVERLAP may be introduced with this windows (e.g. 50% overlap means the neural network will be considering most of the audio sample twice)
+%verduidelik van SNR (of SQNR, Signal-to-Quantization-Noise Ratio) en werk hom uit vir 'n bit depth van 16 as: SQNR(16) ~= 96 dB
+
+%mention that the 4s samples will be divided into a few different windows/segments (e.g. four 1s windows) -> to reduce the complexity of the machine learning algorithm. OVERLAP may be introduced with this windows (e.g. 50% overlap means the neural network will be considering most of the audio sample twice). OF discard MFCC's wat nie 'n spesifieke grootte het nie.
 
 \newpage
 
@@ -547,6 +555,7 @@ Consequently, the STFT (short-time Fourier transform) is calculated by determini
 
 Finally, the (logarithmic) Mel filterbank is applied to the signal, producing the two-dimensional array of MFCC's in Figure \ref{mfcc_example} that serves as input to the neural network. Note that $13$ coefficients are considered here with time windows of $25$ ms and a step size of $10$ ms. %TODO relate these window- and step sizes to the amount of samples per window/step (sodra uitgevind het wat die mics se specs is)
 
+
 \begin{figure}[h!]
     \centering % centers the figure
     \includegraphics[padding=1ex,width=0.8\textwidth,frame]{img/mfcc_example.png}
@@ -555,30 +564,41 @@ Finally, the (logarithmic) Mel filterbank is applied to the signal, producing th
 \end{figure}
 
 \subsection{Background}
-%TODO discuss MFCC's a bit more
+% Discuss MFCC's a bit more:
 % 13 triangular filters with logarithmically ascending size (corresponding to the fact that human ears also prioritize lower frequencies)
 
-%TODO mention AutoEncoders
+%mention AutoEncoders
 
-%TODO mention Audio Embeddings (inspired by text embeddings), (uses a CNN "under the hood?") RECOMMENDED TO START HERE
+%mention Audio Embeddings (inspired by text embeddings), (uses a CNN "under the hood?") RECOMMENDED TO START HERE
 
-%TODO praat oor (EN APPLY) Data Augmentation:
+%praat oor (EN APPLY) Data Augmentation:
 %Overlap tussen die 1s windows wat gesny word vanuit die 4 sec samples
 %Time shift (and maybe stretch?)
 %Frequency shift (and why stretching wouldn't make too much sense here, although a small amount e.g. 5% might be useful)
 %adding Noise
 
-%TODO mention AND APPLY dropout (first implemented by AlexNet in 2012)
+%mention OVERFITTING en doen die volgende goed om dit te fix:
+%1. simpler architecture (remove layers, decrease # of neurons)
+%en als hieronder ook...
+
+%TODO mention AND APPLY dropout (first implemented by AlexNet in 2012) en vergelyk verskillende "dropout probabilities"
 
 %TODO mention AND APPLY early stopping
 
 %TODO praat oor Normalization (LW nie hier relevant to softmax nie dit beteken iets anders e.g. om 'n wav file te normalize i.t.v. volume)
 
+%TODO praat oor Regularization (L1 en L2 methods) om 'n penalty te add "to punish large weights" (in hierdie geval sal ek L2 gebruik)
+
 %TODO verduidelik softmax en hoe dit gesien kan word as die final activation function vir die neural net
 
-%TODO praat oor CNN's en hoe hulle gebruik word vir CV
+%TODO praat oor CNN's en hoe hulle gebruik word vir CV; onthou van ZERO PADDING; AND THE WEIGHTS OF THE KERNELS ARE THE VALUES THAT ARE BEING LEARNED BY THE NETWORK
 
-%TODO vind uit waarvoor staan MIR
+%Architectural decisions for CNN's:
+%1. Grid size (of the kernel) --> usually(?) an odd value (so that it has a centre pixel)
+%2. Stride ("step size" while applying kernel to spectrogram/image)
+%3. Depth (het te doen met verskillende channels e.g. RGB; nie rerag van toepassing hier nie tensy ons die ander channel van die WAV file ook in berekening bring; dan sou jy essentially nog 'n dimensie by die kernel se blokkie gevoeg het... Vir my use-case is die depth=1)
+%4. Number of kernels ==> Elke kernel output 'n enkele 2D array. Jy kan meer kernels bysit dan't jy soveel meer 2D arrays as output vir hierdie convolutional layer.
+%5. Pooling schema (e.g. max/average pooling; grootte vir groepie wat saamgepool word, grootte van strides/steps)
 
 %TODO praat oor Transfer learning (chopping off/using a pre-trained network (designed for some other use-case) and applying it to our problem). Mention hier hoe ons images se goed amper netso kan toepas op klank.
 %LW dat die twee asse van 'n spectrogram verskil van 'n gewone image in die sin dat DIE TWEE ASSE VERSKILLENDE GOED verteenwoordig.
@@ -606,9 +626,10 @@ Finally, the (logarithmic) Mel filterbank is applied to the signal, producing th
 
 %TODO include CNN's vs RNN's vs etc... (vergelyk verskillende tipe models; BEGIN BY 'N GEWONE PERCEPTRON)
 
-%TODO include verskillende tipes optimizers
+%TODO include verskillende tipes optimizers (e.g. Adam) en learning rates en loss function (e.g. sparse_categorical_crossentropy) en batching (e.g. mini-batches tussen 16 en 128 samples) vir stochastic gradient descent during training.
 
 %TODO include verskillende activation functions (sigmoid vs relu)
+%relu laat mens toe om vinniger te train en dit vermy ook vanishing gradient
 
 
 
